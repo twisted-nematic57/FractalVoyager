@@ -1,0 +1,14 @@
+TOP HALF:
+* Render Preview (6:1, progressive tiled)
+
+BOTTOM HALF LEFT:
+* CPU Temp Graph
+* JVM Memory Usage Graph (https://stackoverflow.com/a/12807848)
+
+BOTTOM HALF RIGHT:
+* Current px position & iteration # of each of the 4 threads
+* Current zoom level, digits of precision, seconds/pixel
+* Uptime, throttling status, # of queued renders
+
+BOTTOM BOTTOM:
+* This render total progress bar: text on outside when small %, inside the bar when large %

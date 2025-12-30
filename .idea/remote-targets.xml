@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteTargetsManager">
+    <targets>
+      <target name="tn57@10.44.0.1:22" type="ssh/sftp" uuid="f38a53bf-157b-422d-b44f-6b5ac346e4cd">
+        <config>
+          <option name="projectRootOnTarget" value="/home/tn57/FractalVoyagerDev" />
+          <option name="serverName" value="tn57@10.44.0.1:22 password" />
+          <option name="useRsync" value="true" />
+        </config>
+        <ContributedStateBase type="JavaLanguageRuntime">
+          <config>
+            <option name="homePath" value="/home/tn57/jdk25" />
+            <option name="javaVersionString" value="25.0.3-ea" />
+          </config>
+        </ContributedStateBase>
+      </target>
+      <target name="tn57@10.0.0.31:22" type="ssh/sftp" uuid="16dbb9c4-3c41-4198-95eb-fedfd91de6ad">
+        <config>
+          <option name="projectRootOnTarget" value="/home/tn57/FractalVoyagerDev" />
+          <option name="serverName" value="tn57@10.0.0.31:22 password" />
+          <option name="useRsync" value="true" />
+        </config>
+        <ContributedStateBase type="JavaLanguageRuntime">
+          <config>
+            <option name="homePath" value="/home/tn57/jdk25" />
+            <option name="javaVersionString" value="25.0.3-ea" />
+          </config>
+        </ContributedStateBase>
+      </target>
+    </targets>
+  </component>
+</project>
