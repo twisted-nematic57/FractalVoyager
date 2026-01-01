@@ -45,7 +45,7 @@ public class Main {
     FractalRenderer.maxIterations = Integer.parseInt(config.getProperty("fv.defaults.iterations"));
     FractalRenderer.maxPrecision = Integer.parseInt(config.getProperty("fv.defaults.maxPrecision"));
     // Escape threshold is squared from what's stored in the config file for performance and convenience reasons.
-    FractalRenderer.escapeThreshold = ApfloatMath.pow(new Apfloat(config.getProperty("fv.defaults.escapeThreshold")), 2);
+    FractalRenderer.escapeThreshold2 = ApfloatMath.pow(new Apfloat(config.getProperty("fv.defaults.escapeThreshold")), 2);
 
     Apcomplex c = new Apcomplex( // Escapes at 8 iterations
         new Apfloat("-0.8130614", FractalRenderer.maxPrecision),
