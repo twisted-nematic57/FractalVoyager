@@ -15,10 +15,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
   private static final boolean IS_PI = GraphicsEnvironment.isHeadless(); // If headless, likely running on a Pi
   private static final int THREADS = 4; // We're hardcoding 4 threads to be used due to the nature of the RPi Zero 2 W.
+  private static final Object PRINT_LOCK = new Object(); // For safe multithreaded printing
 
   public static void main(String[] args) {
     System.out.println("Initializing Fractal Voyager.");
@@ -47,11 +50,47 @@ public class Main {
     // Escape threshold is squared from what's stored in the config file for performance and convenience reasons.
     FractalRenderer.escapeThreshold2 = ApfloatMath.pow(new Apfloat(config.getProperty("fv.defaults.escapeThreshold")), 2);
 
-    Apcomplex c = new Apcomplex( // Escapes at 8 iterations
+    /*Apcomplex c = new Apcomplex( // Escapes at 8 iterations
         new Apfloat("-0.8130614", FractalRenderer.maxPrecision),
         new Apfloat("0.3311725", FractalRenderer.maxPrecision)
-    );
+    );*/
 
-    System.out.println(FractalRenderer.iterate(c, 0));
+    /*Apcomplex c = new Apcomplex( // Escapes at 4 iterations
+        new Apfloat("-1.5301676", FractalRenderer.maxPrecision),
+        new Apfloat("0.2678571", FractalRenderer.maxPrecision)
+    );*/
+
+    /*Apcomplex c = new Apcomplex( // Escapes at 530 iterations
+        new Apfloat("-1.110837226080421", FractalRenderer.maxPrecision),
+        new Apfloat("0.254209106649308", FractalRenderer.maxPrecision)
+    );*/
+
+    /*Apcomplex c = new Apcomplex( // Should never escape
+        new Apfloat("-0.1", FractalRenderer.maxPrecision),
+        new Apfloat("0.2", FractalRenderer.maxPrecision)
+    );*/
+
+    double cr = -0.1;
+    double ci = 0.2;
+
+    Slot s1 = new Slot("identity", new Apcomplex[0], new Apcomplex(new Apfloat(1), new Apfloat(0)), new Apcomplex(new Apfloat(2), new Apfloat(0)), new Apcomplex(new Apfloat(1), new Apfloat(0)), new Apcomplex(new Apfloat(1), new Apfloat(0)));
+    Slot s2 = FractalRenderer.emptySlot;
+    Slot s3 = FractalRenderer.emptySlot;
+    Apcomplex J = new Apcomplex(new Apfloat(1), new Apfloat(0));
+    Apcomplex K = new Apcomplex(new Apfloat(1), new Apfloat(0));
+
+
+    ExecutorService pool = Executors.newFixedThreadPool(THREADS);
+
+    for (int t = 0; t < THREADS; t++) {
+      final int threadId = t;
+      //pool.submit(() -> FractalRenderer.iterate(s1, s2, s3, c, J, K, threadId, PRINT_LOCK));
+      //pool.submit(() -> FractalRenderer.iterate_mandelbrot(c, threadId, PRINT_LOCK));
+      pool.submit(() -> FractalRenderer.iterate_mandelbrot_fast(cr, ci, threadId, PRINT_LOCK));
+    }
+
+    pool.shutdown();
+
+    //System.out.println(FractalRenderer.iterate(s1, s2, s3, c, J, K));
   }
 }

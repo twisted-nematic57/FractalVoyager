@@ -11,9 +11,9 @@ public class Slot {
   private final FractalFunction function;
   private final Apcomplex[] params;
   private final Apcomplex A, B;
-  private final long p, q;
+  private final Apcomplex p, q;
 
-  public Slot(String functionName, Apcomplex[] params, Apcomplex A, long p, Apcomplex B, long q) {
+  public Slot(String functionName, Apcomplex[] params, Apcomplex A, Apcomplex p, Apcomplex B, Apcomplex q) {
     this.function = FunctionRegistry.FUNCTIONS.get(functionName);
     if (this.function == null) {
       throw new IllegalArgumentException("ERROR: Unknown function \"" + functionName + "\"");
@@ -27,8 +27,7 @@ public class Slot {
   }
 
   public Apcomplex eval(Apcomplex z) {
-    Apcomplex x = A.multiply(ApcomplexMath.pow(z, p));
-    Apcomplex y = function.apply(x, params);
-    return B.multiply(ApcomplexMath.pow(y, q));
+    // B*func(A*z^p[,...])^q
+    return B.multiply(ApcomplexMath.pow(function.apply(A.multiply(ApcomplexMath.pow(z, p)), params), q));
   }
 }
