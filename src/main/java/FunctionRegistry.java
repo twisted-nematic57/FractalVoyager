@@ -9,6 +9,7 @@ import org.apfloat.ApcomplexMath;
 
 import java.util.Map;
 
+// TODO: expand support to the entire ApcomplexMath library
 public class FunctionRegistry {
   private FunctionRegistry() {} // Prevent instantiation
 

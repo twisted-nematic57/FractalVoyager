@@ -27,7 +27,7 @@ public class Slot {
   }
 
   public Apcomplex eval(Apcomplex z) {
-    // B*func(A*z^p[,...])^q
+    // B * func(A * z^p [,...] )^q
     return B.multiply(ApcomplexMath.pow(function.apply(A.multiply(ApcomplexMath.pow(z, p)), params), q));
   }
 }
