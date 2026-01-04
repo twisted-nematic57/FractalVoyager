@@ -50,12 +50,12 @@ public class Slot {
   }
 
   public Apcomplex eval(Apcomplex z) {
-    // Insert z into the positions where z is supposed to be
-    if(zPositions[0]) B[1] = z;
-    if(zPositions[1]) A[1] = z;
-    if(zPositions[2]) t[1] = z;
-    if(zPositions[3]) p[1] = z;
-    if(zPositions[4]) q[1] = z;
+    // Insert z into the positions where z is supposed to be, or insert 1 if it's not supposed to be there
+    if(zPositions[0]) B[1] = z; else B[1] = Apcomplex.ONE;
+    if(zPositions[1]) A[1] = z; else A[1] = Apcomplex.ONE;
+    if(zPositions[2]) t[1] = z; else t[1] = Apcomplex.ONE;
+    if(zPositions[3]) p[1] = z; else p[1] = Apcomplex.ONE;
+    if(zPositions[4]) q[1] = z; else q[1] = Apcomplex.ONE;
     for(int i = 0; i < params[0].length; i++) {
       if(zPositions[i+5]) {
         params[i][1] = z;
@@ -65,28 +65,12 @@ public class Slot {
     }
 
     // B * func(A * t^p [,...] )^q
-    return multiplyCoefficient(B) // B
+    return PairCoefficient.multiplyCoefficient(B) // B
         .multiply(ApcomplexMath.pow( // * ...^...
             function.apply( // func(
-                multiplyCoefficient(A) // arg1
-                    .multiply(ApcomplexMath.pow(multiplyCoefficient(t), multiplyCoefficient(p))), // * t^p
-                multiplyRows(params)), // [arg2, arg3, ...] (if applicable)
-            multiplyCoefficient(q))); // ...^q
-  }
-
-  // Multiplies each element in row 0 by its corresponding element in row 1 and return a 1D array of the results
-  // Precondition: both rows must be the same length
-  public static Apcomplex[] multiplyRows(Apcomplex[][] params) {
-    int length = params[0].length;
-    Apcomplex[] result = new Apcomplex[length];
-    for (int i = 0; i < length; i++) {
-      result[i] = params[0][i].multiply(params[1][i]);
-    }
-    return result;
-  }
-
-  // Takes in a two-element array. Multiplies the first Apcomplex by the second Apcomplex.
-  public static Apcomplex multiplyCoefficient(Apcomplex[] c) {
-    return c[0].multiply(c[1]);
+                PairCoefficient.multiplyCoefficient(A) // arg1
+                    .multiply(ApcomplexMath.pow(PairCoefficient.multiplyCoefficient(t), PairCoefficient.multiplyCoefficient(p))), // * t^p
+                PairCoefficient.multiplyRows(params)), // [arg2, arg3, ...] (if applicable)
+            PairCoefficient.multiplyCoefficient(q))); // ...^q
   }
 }

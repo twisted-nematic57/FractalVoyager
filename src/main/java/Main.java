@@ -70,7 +70,17 @@ public class Main {
     );*/
 
     Slot s1 = FractalRenderer.mandelbrotSet;
-    Slot s2 = FractalRenderer.emptySlot;
+    //Slot s2 = FractalRenderer.emptySlot;
+    Slot s2 = new Slot(
+        "identity",
+        Apcomplex.ZERO,
+        Apcomplex.ONE,
+        Apcomplex.ONE,
+        Apcomplex.ONE,
+        new Apcomplex(new Apfloat(2), new Apfloat(0.4)),
+        new Apcomplex[0],
+        new boolean[] {false, false, false, false, false}
+    );
     Slot s3 = FractalRenderer.emptySlot;
     Apcomplex J = new Apcomplex(new Apfloat(1), new Apfloat(0));
     Apcomplex K = new Apcomplex(new Apfloat(1), new Apfloat(0));
@@ -87,8 +97,14 @@ public class Main {
 
     pool.shutdown();*/
 
-    FractalRenderer fr = new FractalRenderer(s1, s2, s3, J, K, new boolean[] {false, false}, true);
-    //System.out.println(fr.iterate(c));
-    System.out.println(fr.iterate_arbitrary_fractal_1s(c));
+    FractalRenderer fr = new FractalRenderer(s1, s2, s3, J, K, new boolean[] {false, false}, false);
+    System.out.println(fr.iterate(c));
+    //System.out.println(fr.iterate_arbitrary_fractal_1s(c));
+
+    /*FractalRenderer[] frs = new FractalRenderer[10];
+    for(int i = 0; i < 10; i++) {
+      frs[i] = new FractalRenderer(s1, s2, s3, J, K, new boolean[] {false, false}, true);
+      System.out.println("Iteration^2 " + i + ": " + frs[i].iterate(c));
+    }*/
   }
 }
