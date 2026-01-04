@@ -9,8 +9,7 @@
 
 import org.apfloat.Apcomplex;
 
-/*
-   Fractal function extended parameters are the parameters passed to multi-input functions that can be used to generate
+/* Fractal function extended parameters are the parameters passed to multi-input functions that can be used to generate
    fractals. They're called "extended" because they only contain arguments after the first one, for convenience reasons.
    Since it's possible to plug in constants, z itself, or z multiplied by constants into these arguments, they're stored
    in a similar fashion to PairCoefficients. Since there can be more than two arguments to one function, the arguments

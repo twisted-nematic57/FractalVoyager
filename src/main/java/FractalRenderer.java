@@ -13,8 +13,8 @@ public class FractalRenderer {
   public static int maxIterations, maxPrecision;
   public static Apfloat escapeThreshold2; // Escape threshold is kept internally squared from what's stored in the config file for performance and convenience reasons.
   public Slot s1, s2, s3;
-  public Apcomplex J, K;
-  public boolean[] zPositions;
+  public PairCoefficient J, K;
+  public boolean[] zPositions; // Only 2 elements long in this class.
   public boolean fast; // If computing the Mandelbrot Set, should we use FP (doubles)? true = yes, false = use slow arbitrary precision
 
   // Evaluates to zero
@@ -45,8 +45,8 @@ public class FractalRenderer {
     this.s1 = s1;
     this.s2 = s2;
     this.s3 = s3;
-    this.J = J;
-    this.K = K;
+    this.J = new PairCoefficient(J);
+    this.K = new PairCoefficient(K);
     this.zPositions = zPositions;
     this.fast = fast;
   }
@@ -80,10 +80,10 @@ public class FractalRenderer {
 
     for(int i = 0; i < maxIterations; i++) {
       // If z is supposed to be plugged in to J or K, then apply that
-      if(zPositions[0]) J = z;
-      if(zPositions[1]) K = z;
+      J.insertz(z, zPositions[0]);
+      K.insertz(z, zPositions[1]);
 
-      z = ApcomplexMath.pow(s1.eval(z).add(s2.eval(z)).add(s3.eval(z)).add(c).divide(J), K);
+      z = ApcomplexMath.pow(s1.eval(z).add(s2.eval(z)).add(s3.eval(z)).add(c).divide(J.computeScalar()), K.computeScalar());
 
       // If real^2 + imag^2 >= (escape threshold)^2 then the point is outside the fractal
       if(z.real().multiply(z.real()).add(z.imag().multiply(z.imag())).compareTo(escapeThreshold2) >= 0) {
@@ -106,10 +106,10 @@ public class FractalRenderer {
 
     for(int i = 0; i < maxIterations; i++) {
       // If z is supposed to be plugged in to J or K, then apply that
-      if(zPositions[0]) J = z;
-      if(zPositions[1]) K = z;
+      J.insertz(z, zPositions[0]);
+      K.insertz(z, zPositions[1]);
 
-      z = ApcomplexMath.pow(s1.eval(z).add(s2.eval(z)).add(c).divide(J), K);
+      z = ApcomplexMath.pow(s1.eval(z).add(s2.eval(z)).add(c).divide(J.computeScalar()), K.computeScalar());
 
       // If real^2 + imag^2 >= (escape threshold)^2 then the point is outside the fractal
       if(z.real().multiply(z.real()).add(z.imag().multiply(z.imag())).compareTo(escapeThreshold2) >= 0) {
@@ -132,10 +132,10 @@ public class FractalRenderer {
 
     for(int i = 0; i < maxIterations; i++) {
       // If z is supposed to be plugged in to J or K, then apply that
-      if(zPositions[0]) J = z;
-      if(zPositions[1]) K = z;
+      J.insertz(z, zPositions[0]);
+      K.insertz(z, zPositions[1]);
 
-      z = ApcomplexMath.pow(s1.eval(z).add(c).divide(J), K);
+      z = ApcomplexMath.pow(s1.eval(z).add(c).divide(J.computeScalar()), K.computeScalar());
 
       // If real^2 + imag^2 >= (escape threshold)^2 then the point is outside the fractal
       if(z.real().multiply(z.real()).add(z.imag().multiply(z.imag())).compareTo(escapeThreshold2) >= 0) {
@@ -174,6 +174,7 @@ public class FractalRenderer {
   // Fast Mandelbrot renderer: uses hardware-accelerated FP (doubles) to iterate. Extremely fast but also extremely limited.
   public long iterate_mandelbrot_fast(double cr, double ci) {
     long doneIterations = -1; // Used in an optimization to avoid incrementing every iteration
+
     final double escapeThreshold2_fast = escapeThreshold2.doubleValue();
     final double cr_fast = cr; // Real part of c
     final double ci_fast = ci; // Imaginary part of c

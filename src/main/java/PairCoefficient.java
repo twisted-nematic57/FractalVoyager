@@ -8,8 +8,7 @@
 import org.apfloat.Apcomplex;
 
 
-/*
-   A "pair coefficient" is a coefficient that's plugged into an equation. It may contain z (a variable) and/or a
+/* A "pair coefficient" is a coefficient that's plugged into an equation. It may contain z (a variable) and/or a
    constant. If, as specified by zPositions, z should not be plugged into the coefficient, then the second element is
    set to 1 to ensure it remains a user-specified constant. If z should be plugged in, then it replaces the second
    element of the pair coefficient's array. This is because when the pair coefficient's value is used in computation,
