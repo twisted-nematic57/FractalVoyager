@@ -69,9 +69,6 @@ public class Main {
         new Apfloat("0.2", FractalRenderer.maxPrecision)
     );*/
 
-    double cr = -0.1;
-    double ci = 0.2;
-
     Slot s1 = FractalRenderer.mandelbrotSet;
     Slot s2 = FractalRenderer.emptySlot;
     Slot s3 = FractalRenderer.emptySlot;
@@ -90,6 +87,8 @@ public class Main {
 
     pool.shutdown();*/
 
-    System.out.println(FractalRenderer.iterate(s1, s2, s3, c, J, K, true));
+    FractalRenderer fr = new FractalRenderer(s1, s2, s3, J, K, new boolean[] {false, false}, true);
+    //System.out.println(fr.iterate(c));
+    System.out.println(fr.iterate_arbitrary_fractal_1s(c));
   }
 }

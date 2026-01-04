@@ -1,0 +1,15 @@
+z_{n+1}
+=
+\left(
+\frac{
+B_1 \, \bigl(\mathrm{func}_1(A_1 \, t_1^{p_1})\bigr)^{q_1}
++
+B_2 \, \bigl(\mathrm{func}_2(A_2 \, t_2^{p_2})\bigr)^{q_2}
++
+B_3 \, \bigl(\mathrm{func}_3(A_3 \, t_3^{p_3})\bigr)^{q_3}
++
+c
+}{
+J
+}
+\right)^{K}

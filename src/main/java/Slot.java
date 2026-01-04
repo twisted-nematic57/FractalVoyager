@@ -8,10 +8,10 @@ import org.apfloat.Apcomplex;
 import org.apfloat.ApcomplexMath;
 
 
-/* A z-slot is a non-constant value that's added to the numerator of the general fractal equation as defined in
-   Mockups/fractal_eqn.png:
+/* A z-slot is a (ideally non-constant) value that's added to the numerator of the general fractal
+   equation as defined in Mockups/fractal_eqn.png:
 
-   B * func(A * z^p)^q
+   B * func(A * t^p)^q
 
    Each slot is designed to have either constants or z itself contained in each variable. z can be
    plugged into multiple variables, allowing z-slots like z^z.
@@ -26,36 +26,67 @@ import org.apfloat.ApcomplexMath;
 
 public class Slot {
   private final FractalFunction function;
-  private final Apcomplex[] params; // Function parameters: array because some functions in ApcomplexMath take multiple arguments
-  private final boolean[] zPositions; // Variable indices in order: B, A, p, q, [math function args]; for each index, if true, z will be used there instead of a constant.
-  private Apcomplex A, B;
-  private Apcomplex p, q;
+  private final Apcomplex[][] params; // Function parameters: array because some functions in ApcomplexMath take multiple arguments
+  private final boolean[] zPositions; // Variable indices in order: B, A, t, p, q, [math function args]
+  private Apcomplex[] A, B, t, p, q;
 
-  public Slot(String functionName, Apcomplex B, Apcomplex A, Apcomplex p, Apcomplex q, Apcomplex[] params, boolean[] zPositions) {
+  public Slot(String functionName, Apcomplex B, Apcomplex A, Apcomplex t, Apcomplex p, Apcomplex q, Apcomplex[] params, boolean[] zPositions) {
     this.function = FunctionRegistry.FractalFunctions.get(functionName);
-    if (this.function == null) {
+    if(this.function == null) {
       throw new IllegalArgumentException("\nERROR: Unknown function \"" + functionName + "\"");
     }
 
-    this.B = B;
-    this.A = A;
-    this.p = p;
-    this.q = q;
-    this.params = params;
+    this.B = new Apcomplex[] {B, B}; // Yes, they're arrays. If z is not being plugged into them then it doesn't matter
+    this.A = new Apcomplex[] {A, A}; // why; however if z is plugged in then it _does_ matter because z will be inserted
+    this.t = new Apcomplex[] {t, t}; // into the second element before each evaluation and scaled by the first. This
+    this.p = new Apcomplex[] {p, p}; // allows for more flexibility and fractal complexity.
+    this.q = new Apcomplex[] {q, q};
+
+    if(zPositions.length - 5 != params.length) { // -5 because first 5 elements are dedicated to B, A, t, p, q; all _after_ those are for more function parameters (if applicable)
+      throw new IllegalArgumentException("\nERROR: z-positions for function parameters and function parameter lengths must match. z-positions: " + zPositions.length + "; params: " + params.length);
+    }
     this.zPositions = zPositions;
+    this.params = new Apcomplex[][] {params.clone(), params.clone()};
   }
 
   public Apcomplex eval(Apcomplex z) {
     // Insert z into the positions where z is supposed to be
-    if(zPositions[0]) B = z;
-    if(zPositions[1]) A = z;
-    if(zPositions[2]) p = z;
-    if(zPositions[3]) q = z;
-    for(int i = 0; i < params.length; i++) {
-      if(zPositions[i+4]) params[i] = z;
+    if(zPositions[0]) B[1] = z;
+    if(zPositions[1]) A[1] = z;
+    if(zPositions[2]) t[1] = z;
+    if(zPositions[3]) p[1] = z;
+    if(zPositions[4]) q[1] = z;
+    for(int i = 0; i < params[0].length; i++) {
+      if(zPositions[i+5]) {
+        params[i][1] = z;
+      } else {
+        params[i][1] = Apcomplex.ONE;
+      }
     }
 
-    // B * func(A * z^p [,...] )^q
-    return B.multiply(ApcomplexMath.pow(function.apply(A.multiply(ApcomplexMath.pow(z, p)), params), q));
+    // B * func(A * t^p [,...] )^q
+    return multiplyCoefficient(B) // B
+        .multiply(ApcomplexMath.pow( // * ...^...
+            function.apply( // func(
+                multiplyCoefficient(A) // arg1
+                    .multiply(ApcomplexMath.pow(multiplyCoefficient(t), multiplyCoefficient(p))), // * t^p
+                multiplyRows(params)), // [arg2, arg3, ...] (if applicable)
+            multiplyCoefficient(q))); // ...^q
+  }
+
+  // Multiplies each element in row 0 by its corresponding element in row 1 and return a 1D array of the results
+  // Precondition: both rows must be the same length
+  public static Apcomplex[] multiplyRows(Apcomplex[][] params) {
+    int length = params[0].length;
+    Apcomplex[] result = new Apcomplex[length];
+    for (int i = 0; i < length; i++) {
+      result[i] = params[0][i].multiply(params[1][i]);
+    }
+    return result;
+  }
+
+  // Takes in a two-element array. Multiplies the first Apcomplex by the second Apcomplex.
+  public static Apcomplex multiplyCoefficient(Apcomplex[] c) {
+    return c[0].multiply(c[1]);
   }
 }
