@@ -20,8 +20,7 @@ import java.util.concurrent.Executors;
 
 public class Main {
   private static final boolean IS_PI = GraphicsEnvironment.isHeadless(); // If headless, likely running on a Pi
-  private static final int THREADS = 4; // We're hardcoding 4 threads to be used due to the nature of the RPi Zero 2 W.
-  private static final Object PRINT_LOCK = new Object(); // For safe multithreaded printing
+  private static final int THREADS = Runtime.getRuntime().availableProcessors();
 
   public static void main(String[] args) {
     System.out.println("Initializing Fractal Voyager.");
@@ -91,6 +90,6 @@ public class Main {
 
     pool.shutdown();*/
 
-    System.out.println(FractalRenderer.iterate(s1, s2, s3, c, J, K, 0, PRINT_LOCK, true));
+    System.out.println(FractalRenderer.iterate(s1, s2, s3, c, J, K, true));
   }
 }

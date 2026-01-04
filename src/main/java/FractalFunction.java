@@ -10,5 +10,5 @@ import org.apfloat.Apcomplex;
 
 @FunctionalInterface
 public interface FractalFunction {
-  Apcomplex apply(Apcomplex x, Apcomplex[] params);
+  Apcomplex apply(Apcomplex x, Apcomplex[] extraParams);
 }

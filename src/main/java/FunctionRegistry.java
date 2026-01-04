@@ -9,25 +9,19 @@ import org.apfloat.ApcomplexMath;
 
 import java.util.Map;
 
-// TODO: expand support to the entire ApcomplexMath library
+// TODO: add more functions
 public class FunctionRegistry {
   private FunctionRegistry() {} // Prevent instantiation
 
-  public static final Map<String, FractalFunction> FUNCTIONS = Map.of(
-      "identity", (x, p) -> x,
+  public static final Map<String, FractalFunction> FractalFunctions = Map.of(
+      "identity", (x, p) -> x, // i.e., blank function
 
-      "sin", (x, p) ->
-          ApcomplexMath.sin(x),
+      "sin", (x, p) -> ApcomplexMath.sin(x),
 
-      "pow", (x, p) ->
-          ApcomplexMath.pow(p[0], x),
+      "pow", (x, p) -> ApcomplexMath.pow(x, p[0]),
 
-      "gamma", (x, p) ->
-          ApcomplexMath.gamma(x),
+      "gamma", (x, p) -> ApcomplexMath.gamma(x),
 
-      "hyp2f1", (x, p) ->
-          ApcomplexMath.hypergeometric2F1(
-              p[0], p[1], p[2], x
-          )
+      "hyp2f1", (x, p) -> ApcomplexMath.hypergeometric2F1(x, p[0], p[1], p[2])
   );
 }
