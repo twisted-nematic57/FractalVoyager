@@ -1,4 +1,5 @@
 target/
+_tmp/*
 *.jar
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/

@@ -1,4 +1,4 @@
-/*** FractalRenderer.java *****************************************************\
+/*** FractalIterator.java *****************************************************\
  * Author:         twisted_nematic57                                          *
  * Date Created:   2025-12-30                                                 *
  * Description:    Implements mathematical code that iterates on points of    *
@@ -9,7 +9,7 @@ import org.apfloat.Apcomplex;
 import org.apfloat.ApcomplexMath;
 import org.apfloat.Apfloat;
 
-public class FractalRenderer {
+public class FractalIterator {
   public static int maxIterations, maxPrecision;
   public static Apfloat escapeThreshold2; // Escape threshold is kept internally squared from what's stored in the config file for performance and convenience reasons.
   public Slot s1, s2, s3;
@@ -29,7 +29,7 @@ public class FractalRenderer {
       new boolean[] {false, false, false, false, false}
   );
 
-  // Defines the one z-slot needed to get the Mandelbrot Set
+  // Defines the single z-slot needed to get the Mandelbrot Set
   public static final Slot mandelbrotSet = new Slot(
       "identity",
       Apcomplex.ONE,
@@ -41,7 +41,7 @@ public class FractalRenderer {
       new boolean[] {false, false, true, false, false}
   );
 
-  public FractalRenderer(Slot s1, Slot s2, Slot s3, Apcomplex J, Apcomplex K, boolean[] zPositions, boolean fast) {
+  public FractalIterator(Slot s1, Slot s2, Slot s3, Apcomplex J, Apcomplex K, boolean[] zPositions, boolean fast) {
     this.s1 = s1;
     this.s2 = s2;
     this.s3 = s3;

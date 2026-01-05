@@ -10,13 +10,15 @@ import org.apfloat.Apcomplex;
 import org.apfloat.Apfloat;
 import org.apfloat.ApfloatMath;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Main {
   private static final boolean IS_PI = GraphicsEnvironment.isHeadless(); // If headless, likely running on a Pi
@@ -44,67 +46,84 @@ public class Main {
       System.out.println("ERROR: Couldn't load FractalVoyager.properties. (Does it exist?) Details:\n" + e.getMessage());
     }
 
-    FractalRenderer.maxIterations = Integer.parseInt(config.getProperty("fv.defaults.iterations"));
-    FractalRenderer.maxPrecision = Integer.parseInt(config.getProperty("fv.defaults.maxPrecision"));
+    FractalIterator.maxIterations = Integer.parseInt(config.getProperty("fv.defaults.iterations"));
+    FractalIterator.maxPrecision = Integer.parseInt(config.getProperty("fv.defaults.maxPrecision"));
     // Escape threshold is squared from what's stored in the config file for performance and convenience reasons.
-    FractalRenderer.escapeThreshold2 = ApfloatMath.pow(new Apfloat(config.getProperty("fv.defaults.escapeThreshold")), 2);
+    FractalIterator.escapeThreshold2 = ApfloatMath.pow(new Apfloat(config.getProperty("fv.defaults.escapeThreshold")), 2);
 
-    Apcomplex c = new Apcomplex( // Escapes at 8 iterations
-        new Apfloat("-0.8130614", FractalRenderer.maxPrecision),
-        new Apfloat("0.3311725", FractalRenderer.maxPrecision)
-    );
+    /*Slot s1 = FractalIterator.mandelbrotSet;
+    Slot s2 = FractalIterator.emptySlot;
+    Slot s3 = FractalIterator.emptySlot;
+    Apcomplex J = Apcomplex.ONE;
+    Apcomplex K = Apcomplex.ONE;*/
 
-    /*Apcomplex c = new Apcomplex( // Escapes at 4 iterations
-        new Apfloat("-1.5301676", FractalRenderer.maxPrecision),
-        new Apfloat("0.2678571", FractalRenderer.maxPrecision)
-    );*/
+    // ------------------------------------------------------------------
+    // Render the Mandelbrot set (fast, double precision) into a PNG file
+    // ------------------------------------------------------------------
 
-    /*Apcomplex c = new Apcomplex( // Escapes at 530 iterations
-        new Apfloat("-1.110837226080421", FractalRenderer.maxPrecision),
-        new Apfloat("0.254209106649308", FractalRenderer.maxPrecision)
-    );*/
+    // ---- 1.  Set up the iterator --------------------------------------------------
+        final boolean fast = true;                                   // use FP
+        final Slot s1 = FractalIterator.mandelbrotSet;               // only one slot needed
+        final Slot s2 = FractalIterator.emptySlot;
+        final Slot s3 = FractalIterator.emptySlot;
+        final Apcomplex J = Apcomplex.ONE;                           // not used for Mandelbrot
+        final Apcomplex K = Apcomplex.ONE;
+        final boolean[] zPositions = new boolean[] {false, false};                 // dummy – not used
 
-    /*Apcomplex c = new Apcomplex( // Should never escape
-        new Apfloat("-0.1", FractalRenderer.maxPrecision),
-        new Apfloat("0.2", FractalRenderer.maxPrecision)
-    );*/
+        final FractalIterator mandelbrotIter =
+            new FractalIterator(s1, s2, s3, J, K, zPositions, fast);
 
-    Slot s1 = FractalRenderer.mandelbrotSet;
-    //Slot s2 = FractalRenderer.emptySlot;
-    Slot s2 = new Slot(
-        "identity",
-        Apcomplex.ZERO,
-        Apcomplex.ONE,
-        Apcomplex.ONE,
-        Apcomplex.ONE,
-        new Apcomplex(new Apfloat(2), new Apfloat(0.4)),
-        new Apcomplex[0],
-        new boolean[] {false, false, false, false, false}
-    );
-    Slot s3 = FractalRenderer.emptySlot;
-    Apcomplex J = new Apcomplex(new Apfloat(1), new Apfloat(0));
-    Apcomplex K = new Apcomplex(new Apfloat(1), new Apfloat(0));
+    // ---- 2.  Create the image ---------------------------------------------------
+        final int width  = 1024;
+        final int height = 768;
+        final BufferedImage image = new BufferedImage(width, height,
+            BufferedImage.TYPE_USHORT_GRAY);
+        final WritableRaster raster = image.getRaster();
 
+    // ---- 3.  Define the complex‑plane limits ------------------------------------
+        final double xmin = -2.333;
+        final double xmax =  1.0;
+        final double ymin = -1.25;
+        final double ymax =  1.25;
 
-    /*ExecutorService pool = Executors.newFixedThreadPool(THREADS);
+    // ---- 4.  Render -------------------------------------------------------------
+        for (int y = 0; y < height; y++) {
+          // Map pixel row to imaginary coordinate (top → ymin, bottom → ymax)
+          final double ci = ymax - (y / (double)(height - 1)) * (ymax - ymin);
 
-    for (int t = 0; t < THREADS; t++) {
-      final int threadId = t;
-      pool.submit(() -> FractalRenderer.iterate(s1, s2, s3, c, J, K, threadId, PRINT_LOCK, false));
-      //pool.submit(() -> FractalRenderer.iterate(s1, s2, s3, c, J, K, threadId, PRINT_LOCK, false));
-      //pool.submit(() -> FractalRenderer.iterate_mandelbrot_fast(cr, ci, threadId, PRINT_LOCK, true));
-    }
+          for (int x = 0; x < width; x++) {
+            // Map pixel column to real coordinate
+            final double cr = xmin + (x / (double)(width - 1)) * (xmax - xmin);
 
-    pool.shutdown();*/
+            // Fast Mandelbrot iteration (double precision)
+            final long iter = mandelbrotIter.iterate_mandelbrot_fast(cr, ci);
 
-    FractalRenderer fr = new FractalRenderer(s1, s2, s3, J, K, new boolean[] {false, false}, false);
-    System.out.println(fr.iterate(c));
-    //System.out.println(fr.iterate_arbitrary_fractal_1s(c));
+            // ---- 5.  Map iteration count to 16‑bit grayscale ----------------
+            //   * 1 iteration → white (65535)
+            //   * maxIterations → black (0)
+            int gray;
+            if (iter >= FractalIterator.maxIterations) {
+              gray = 0;                                     // fully black
+            } else {
+              // Linear interpolation: 1 -> 65535, max -> 0
+              double frac = (double)(FractalIterator.maxIterations - iter) /
+                  (double)(FractalIterator.maxIterations - 1);
+              gray = (int)Math.round(frac * 65535.0);
+              if (gray > 65535) gray = 65535;
+              if (gray < 0)      gray = 0;
+            }
 
-    /*FractalRenderer[] frs = new FractalRenderer[10];
-    for(int i = 0; i < 10; i++) {
-      frs[i] = new FractalRenderer(s1, s2, s3, J, K, new boolean[] {false, false}, true);
-      System.out.println("Iteration^2 " + i + ": " + frs[i].iterate(c));
-    }*/
-  }
+            raster.setSample(x, y, 0, gray);
+          }
+        }
+
+    // ---- 6.  Save the PNG -------------------------------------------------------
+        try {
+          final File output = new File("mandelbrot.png");
+          ImageIO.write(image, "png", output);
+          System.out.println("Mandelbrot image written to " + output.getAbsolutePath());
+        } catch (IOException e) {
+          System.err.println("ERROR: Could not write PNG file: " + e.getMessage());
+        }
+      }
 }
